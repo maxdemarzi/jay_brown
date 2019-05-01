@@ -95,7 +95,7 @@ public class CCRunnable implements Runnable {
                     }
 
                     for (Path p : td.traverse(patient)) {
-                        if (!p.endNode().hasProperty(ccProperty)) {
+                        if (p.endNode().hasLabel(Labels.PATIENT) && !p.endNode().hasProperty(ccProperty)) {
                             p.endNode().setProperty(ccProperty, ccID);
                             nextPatients.add(p.endNode().getId());
                             if (changeCounter++ % TRANSACTION_LIMIT == 0) {
