@@ -14,17 +14,17 @@ public class TimeSlicedExpander implements PathExpander {
     private Long start;
     private Long end;
 
-    public TimeSlicedExpander(Long start, Long interval) {
+    public TimeSlicedExpander(Long start, Long end) {
         this.start = start;
-        this.end = start + interval;
+        this.end = end;
     }
 
     @Override
     public Iterable<Relationship> expand(Path path, BranchState branchState) {
         List<Relationship> rels = new ArrayList<>();
         for (Relationship r : path.endNode().getRelationships(Direction.OUTGOING, RelationshipTypes.INPUT, RelationshipTypes.OUTPUT)) {
-            Number time = (Number)r.getProperty(TIME);
-            if (time.longValue() >= start && time.longValue() < end) {
+            long time = Procedures.times.get(r.getId());
+            if (time >= start && time < end) {
                 rels.add(r);
             }
         }

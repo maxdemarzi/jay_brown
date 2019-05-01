@@ -17,7 +17,15 @@ that can be copied to the `plugin` directory of your Neo4j instance.
 
 Restart your Neo4j Server. Your new Stored Procedures are available:
 
-    CALL edu.baylor.cc($time, $interval)
+    CALL edu.baylor.cc($time, $interval, $end)
+    CALL edu.baylor.cc(1262304000, 2592000, 1267488000)
+    
+Then check:
+
+    MATCH (n) 
+    RETURN n.ccId, count(*) 
+    ORDER BY n.ccId
+    
 
 For example given the following graph:
 

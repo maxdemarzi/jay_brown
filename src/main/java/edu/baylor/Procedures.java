@@ -1,12 +1,17 @@
 package edu.baylor;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import edu.baylor.results.StringResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.*;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+import static edu.baylor.schema.Properties.TIME;
 
 public class Procedures {
 
@@ -20,16 +25,38 @@ public class Procedures {
     @Context
     public Log log;
 
-    @Procedure(name = "edu.baylor.cc", mode = Mode.WRITE)
-    @Description("CALL edu.baylor.cc(from, to) - find connected components between timestamps")
-    public Stream<StringResult> cc(@Name("time") Number time, @Name("interval") Number interval) throws InterruptedException {
-        long start = System.nanoTime();
+    public static final String runname = "edu.baylor.cc";
 
-        Thread t1 = new Thread(new CCRunnable(db, log, time.longValue(), interval.longValue()));
+    // Cache INPUT/OUTPUT times
+    static LoadingCache<Long, Long> times = Caffeine.newBuilder()
+            .build(Procedures::getTimes);
+
+    private static Long getTimes(Long relationshipId) {
+        return ((Number) dbapi.getRelationshipById(relationshipId).getProperty(TIME)).longValue();
+    }
+
+    private static GraphDatabaseService dbapi;
+
+    @Procedure(name = "edu.baylor.cc", mode = Mode.WRITE)
+    @Description("CALL edu.baylor.cc(from, to, end) - find connected components between timestamps")
+    public Stream<StringResult> cc(@Name("time") Number time, @Name("interval") Number interval, @Name("endtime") Number endtime) throws InterruptedException {
+        if (dbapi == null) {
+            dbapi = db;
+        }
+
+        long start = System.nanoTime();
+        ArrayList<String> stringsToPrint = new ArrayList<>();
+
+        Thread t1 = new Thread(new CCRunnable(db, log, time.longValue(), interval.longValue(), endtime.longValue(), stringsToPrint));
         t1.start();
         t1.join();
 
-        return Stream.of(new StringResult("Connected Components calculated in " + TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start) + " seconds"));
+        StringBuilder outputString = new StringBuilder();
+        for (String subString : stringsToPrint) {
+            outputString.append(subString);
+        }
+
+        return Stream.of(new StringResult(outputString.toString()));
 
     }
 
