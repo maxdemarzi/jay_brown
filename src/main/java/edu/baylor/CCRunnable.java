@@ -15,7 +15,6 @@ import static edu.baylor.schema.Properties.TIME;
 
 public class CCRunnable implements Runnable {
 
-    private static final int TRANSACTION_LIMIT = 1000;
     private GraphDatabaseService db;
     private Log log;
     private Long time;
@@ -39,8 +38,8 @@ public class CCRunnable implements Runnable {
 
         Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
-        Roaring64NavigableMap[] infectedPatients = new Roaring64NavigableMap[1 + intervals];
-        for (int i = 0; i < (1 + intervals); i++) {
+        Roaring64NavigableMap[] infectedPatients = new Roaring64NavigableMap[intervals];
+        for (int i = 0; i < (intervals); i++) {
             infectedPatients[i] = new Roaring64NavigableMap();
         }
 
@@ -52,13 +51,12 @@ public class CCRunnable implements Runnable {
                 long infectedTime = getTimeOfCreation(patient);
                 // Skip any infected nodes beyond our finalendtime
                 if (infectedTime > finalEndTime) { continue; };
-                int slot = (int)((infectedTime - time) / interval);
+                int slot = (int)(Math.ceil((infectedTime - time) / interval));
                 infectedPatients[slot].add(patient.getId());
             }
             tx.success();
         }
 
-        int changeCounter = 1;
         Iterator<Long> iterator;
         long nodeId;
 
