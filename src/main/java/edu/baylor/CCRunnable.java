@@ -65,6 +65,7 @@ public class CCRunnable implements Runnable {
             int counter = 0;
             long endTime;
             do {
+                time = time + (interval * (counter));
                 endTime = time + (interval * (1 + counter));
                 TimeSlicedExpander expander = new TimeSlicedExpander(time, endTime);
 

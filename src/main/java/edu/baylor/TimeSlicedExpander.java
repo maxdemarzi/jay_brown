@@ -7,8 +7,6 @@ import org.neo4j.graphdb.traversal.BranchState;
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.baylor.schema.Properties.TIME;
-
 public class TimeSlicedExpander implements PathExpander {
 
     private Long start;
