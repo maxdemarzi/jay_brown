@@ -32,11 +32,10 @@ public class CCRunnable implements Runnable {
 
     @Override
     public void run() {
-        int ccID = 1;
-        String ccProperty = "ccId";
         // Integer division
         int intervals = 1 + (int)((finalEndTime - time) / interval);
 
+        Roaring64NavigableMap seenPatient = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
         Roaring64NavigableMap[] infectedPatients = new Roaring64NavigableMap[intervals];
         for (int i = 0; i < intervals; i++) {
@@ -60,6 +59,7 @@ public class CCRunnable implements Runnable {
         int changeCounter = 1;
         Iterator<Long> iterator;
         long nodeId;
+
         Transaction tx = db.beginTx();
         try {
             int counter = 0;
@@ -90,14 +90,10 @@ public class CCRunnable implements Runnable {
 
                     nodeId = iterator.next();
                     Node patient = db.getNodeById(nodeId);
-
-                    if (!patient.hasProperty(ccProperty)) {
-                        patient.setProperty(ccProperty, ccID);
-                    }
+                    seenPatient.add(patient.getId());
 
                     for (Path p : td.traverse(patient)) {
-                        if (p.endNode().hasLabel(Labels.PATIENT) && !p.endNode().hasProperty(ccProperty)) {
-                            p.endNode().setProperty(ccProperty, ccID);
+                        if (p.endNode().hasLabel(Labels.PATIENT)) {
                             nextPatients.add(p.endNode().getId());
                             if (changeCounter++ % TRANSACTION_LIMIT == 0) {
                                 commit = true;
@@ -105,16 +101,18 @@ public class CCRunnable implements Runnable {
                         }
                     }
                 }
-                //infectedPatients[counter].or(nextPatients);
+
+                seenPatient.or(nextPatients);
+
                 stringsToPrint.add("/" + " : " + "Until period " + endTime
-                        + " Num infected " + infectedPatients[counter].getLongCardinality() + " Newly infected " + nextPatients.getLongCardinality() + ";\n");
+                        + " Num infected " + infectedPatients[counter].getLongCardinality() + " Newly infected " + nextPatients.getLongCardinality() + " Seen: " + seenPatient.getLongCardinality() +  ";\n");
+
                 // Add known infected plus newly infected patients to known infected patients at next time interval
                 if (counter < intervals) {
                     infectedPatients[counter + 1].or(infectedPatients[counter]);
                     infectedPatients[counter + 1].or(nextPatients);
                     nextPatients.clear();
                 }
-                ccID++;
                 counter++;
             } while (endTime < finalEndTime);
             tx.success();
