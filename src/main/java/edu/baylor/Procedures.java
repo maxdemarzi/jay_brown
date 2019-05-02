@@ -6,6 +6,7 @@ import edu.baylor.results.StringResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.*;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +36,8 @@ public class Procedures {
         return ((Number) dbapi.getRelationshipById(relationshipId).getProperty(TIME)).longValue();
     }
 
+    static Roaring64NavigableMap seenRels = new Roaring64NavigableMap();
+
     private static GraphDatabaseService dbapi;
 
     @Procedure(name = "edu.baylor.cc", mode = Mode.WRITE)
@@ -43,6 +46,9 @@ public class Procedures {
         if (dbapi == null) {
             dbapi = db;
         }
+        // Clean up seen Rels Cache per query
+        Procedures.seenRels.clear();
+        Procedures.seenRels.runOptimize();
 
         long start = System.nanoTime();
         ArrayList<String> stringsToPrint = new ArrayList<>();

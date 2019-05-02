@@ -21,9 +21,11 @@ public class TimeSlicedExpander implements PathExpander {
     public Iterable<Relationship> expand(Path path, BranchState branchState) {
         List<Relationship> rels = new ArrayList<>();
         for (Relationship r : path.endNode().getRelationships(Direction.OUTGOING, RelationshipTypes.INPUT, RelationshipTypes.OUTPUT)) {
+            if(Procedures.seenRels.contains(r.getId())) { continue; }
             long time = Procedures.times.get(r.getId());
             if (time >= start && time < end) {
                 rels.add(r);
+                Procedures.seenRels.add(r.getId());
             }
         }
         return rels;
