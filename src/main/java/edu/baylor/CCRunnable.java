@@ -35,7 +35,7 @@ public class CCRunnable implements Runnable {
     @Override
     public void run() {
         // Integer division
-        int intervals = (int)((finalEndTime - time) / interval);
+        int intervals = (int)(Math.ceil((finalEndTime - time) / interval));
 
         Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
@@ -79,31 +79,18 @@ public class CCRunnable implements Runnable {
                         .uniqueness(Uniqueness.NODE_GLOBAL);
 
 
-                // Add already infeced patients to seen
+                // Add already infected patients to seen
                 infected.or(infectedPatients[counter]);
 
 
                 iterator = infectedPatients[counter].iterator();
-                boolean commit = false;
                 while (iterator.hasNext()) {
-
-                    // Commit to Neo4j and Start a new Transaction
-                    if (commit) {
-                        tx.success();
-                        tx.close();
-                        tx = db.beginTx();
-                        commit = false;
-                    }
-
                     nodeId = iterator.next();
                     Node patient = db.getNodeById(nodeId);
 
                     for (Path p : td.traverse(patient)) {
                         if (p.endNode().hasLabel(Labels.PATIENT)) {
                             nextPatients.add(p.endNode().getId());
-                            if (changeCounter++ % TRANSACTION_LIMIT == 0) {
-                                commit = true;
-                            }
                         }
                     }
                 }
