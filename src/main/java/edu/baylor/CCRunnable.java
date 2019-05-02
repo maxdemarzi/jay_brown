@@ -35,7 +35,7 @@ public class CCRunnable implements Runnable {
         // Integer division
         int intervals = 1 + (int)((finalEndTime - time) / interval);
 
-        Roaring64NavigableMap seenPatient = new Roaring64NavigableMap();
+        Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
         Roaring64NavigableMap[] infectedPatients = new Roaring64NavigableMap[intervals];
         for (int i = 0; i < intervals; i++) {
@@ -44,9 +44,9 @@ public class CCRunnable implements Runnable {
 
         // Step 1: Get the initial set of infected patients
         try(Transaction tx = db.beginTx()) {
-            ResourceIterator<Node> infected =  db.findNodes(Labels.Infected);
-            while (infected.hasNext()) {
-                Node patient = infected.next();
+            ResourceIterator<Node> infectedNodes =  db.findNodes(Labels.Infected);
+            while (infectedNodes.hasNext()) {
+                Node patient = infectedNodes.next();
                 long infectedTime = getTimeOfCreation(patient);
                 // Skip any infected nodes beyond our finalendtime
                 if (infectedTime > finalEndTime) { continue; };
@@ -76,6 +76,10 @@ public class CCRunnable implements Runnable {
                         .uniqueness(Uniqueness.NODE_GLOBAL);
 
 
+                // Add already infeced patients to seen
+                infected.or(infectedPatients[counter]);
+
+
                 iterator = infectedPatients[counter].iterator();
                 boolean commit = false;
                 while (iterator.hasNext()) {
@@ -90,7 +94,6 @@ public class CCRunnable implements Runnable {
 
                     nodeId = iterator.next();
                     Node patient = db.getNodeById(nodeId);
-                    seenPatient.add(patient.getId());
 
                     for (Path p : td.traverse(patient)) {
                         if (p.endNode().hasLabel(Labels.PATIENT)) {
@@ -102,10 +105,10 @@ public class CCRunnable implements Runnable {
                     }
                 }
 
-                seenPatient.or(nextPatients);
+                infected.or(nextPatients);
 
                 stringsToPrint.add("/" + " : " + "Until period " + endTime
-                        + " Num infected " + infectedPatients[counter].getLongCardinality() + " Newly infected " + nextPatients.getLongCardinality() + " Seen: " + seenPatient.getLongCardinality() +  ";\n");
+                        + " Num infected at start " + infectedPatients[counter].getLongCardinality() + " Newly infected " + nextPatients.getLongCardinality() + " All Infected: " + infected.getLongCardinality() +  ";\n");
 
                 // Add known infected plus newly infected patients to known infected patients at next time interval
                 if (counter < intervals) {
