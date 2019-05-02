@@ -118,6 +118,7 @@ public class CCRunnable implements Runnable {
             tx.success();
         } catch ( Exception e ) {
             tx.failure();
+            this.stringsToPrint.add("There was an exception: " + e.getMessage());
         } finally {
             tx.close();
         }

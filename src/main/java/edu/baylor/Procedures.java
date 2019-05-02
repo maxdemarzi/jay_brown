@@ -33,7 +33,7 @@ public class Procedures {
             .build(Procedures::getTimes);
 
     private static Long getTimes(Long relationshipId) {
-        return ((Number) dbapi.getRelationshipById(relationshipId).getProperty(TIME)).longValue();
+        return ((Number) dbapi.getRelationshipById(relationshipId).getProperty(TIME, Long.MAX_VALUE)).longValue();
     }
 
     static Roaring64NavigableMap seenRels = new Roaring64NavigableMap();
