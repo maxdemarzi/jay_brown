@@ -5,10 +5,12 @@ import edu.baylor.schema.RelationshipTypes;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.traversal.*;
 import org.neo4j.logging.Log;
+import org.roaringbitmap.longlong.LongConsumer;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
 import java.util.*;
 
+import static edu.baylor.schema.Properties.NAME;
 import static edu.baylor.schema.Properties.TIME;
 
 public class CCRunnable implements Runnable {
@@ -111,6 +113,11 @@ public class CCRunnable implements Runnable {
 
                 stringsToPrint.add("/" + " : " + "From: " + time + " Until: " + endTime
                         + " Infected:  at start " + infectedPatients[counter].getLongCardinality() + " newly infected " + nextPatients.getLongCardinality() + " All Infected: " + infected.getLongCardinality() +  ";\n");
+
+                // Just for a quick debug of which patients are different.
+                StringBuilder patientIds = new StringBuilder();
+                nextPatients.forEach(l -> patientIds.append(db.getNodeById(l).getProperty(NAME, "no name")).append(","));
+                stringsToPrint.add("Newly Infected Patients: " +  patientIds.toString());
 
                 // Add known infected plus newly infected patients to known infected patients at next time interval
                 if (counter + 1 < intervals) {
