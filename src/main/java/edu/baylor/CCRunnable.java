@@ -37,8 +37,8 @@ public class CCRunnable implements Runnable {
 
         Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
-        Roaring64NavigableMap[] infectedPatients = new Roaring64NavigableMap[intervals];
-        for (int i = 0; i < intervals; i++) {
+        Roaring64NavigableMap[] infectedPatients = new Roaring64NavigableMap[1 + intervals];
+        for (int i = 0; i < (1 + intervals); i++) {
             infectedPatients[i] = new Roaring64NavigableMap();
         }
 
