@@ -63,9 +63,11 @@ public class CCRunnable implements Runnable {
         Transaction tx = db.beginTx();
         try {
             long endTime;
+            // Start - interval and add the interval every time in the loop.
+            time = time - interval;
             for (int counter = 0; counter < intervals; counter++ ) {
-                time = time + (interval * (counter));
-                endTime = time + (interval * (1 + counter));
+                time = time + interval;
+                endTime = time + interval;
                 TimeSlicedExpander expander = new TimeSlicedExpander(time, endTime);
 
                 TraversalDescription td = db.traversalDescription()
