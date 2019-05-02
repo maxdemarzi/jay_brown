@@ -33,7 +33,7 @@ public class CCRunnable implements Runnable {
     @Override
     public void run() {
         // Integer division
-        int intervals = 1 + (int)((finalEndTime - time) / interval);
+        int intervals = (int)((finalEndTime - time) / interval);
 
         Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
@@ -62,9 +62,8 @@ public class CCRunnable implements Runnable {
 
         Transaction tx = db.beginTx();
         try {
-            int counter = 0;
             long endTime;
-            do {
+            for (int counter = 0; counter < intervals; counter++ ) {
                 time = time + (interval * (counter));
                 endTime = time + (interval * (1 + counter));
                 TimeSlicedExpander expander = new TimeSlicedExpander(time, endTime);
@@ -106,18 +105,18 @@ public class CCRunnable implements Runnable {
                 }
 
                 infected.or(nextPatients);
+                nextPatients.andNot(infectedPatients[counter]);
 
-                stringsToPrint.add("/" + " : " + "Until period " + endTime
-                        + " Num infected at start " + infectedPatients[counter].getLongCardinality() + " Newly infected " + nextPatients.getLongCardinality() + " All Infected: " + infected.getLongCardinality() +  ";\n");
+                stringsToPrint.add("/" + " : " + "From: " + time + " Until: " + endTime
+                        + " Infected:  at start " + infectedPatients[counter].getLongCardinality() + " newly infected " + nextPatients.getLongCardinality() + " All Infected: " + infected.getLongCardinality() +  ";\n");
 
                 // Add known infected plus newly infected patients to known infected patients at next time interval
-                if (counter < intervals) {
+                if (counter + 1 < intervals) {
                     infectedPatients[counter + 1].or(infectedPatients[counter]);
                     infectedPatients[counter + 1].or(nextPatients);
                     nextPatients.clear();
                 }
-                counter++;
-            } while (endTime < finalEndTime);
+            }
             tx.success();
         } catch ( Exception e ) {
             tx.failure();

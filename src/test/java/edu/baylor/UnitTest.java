@@ -143,7 +143,7 @@ public class UnitTest {
 
             // When I use the procedure with January 1st 2010 for time, and a monthly interval with the end time 2 months later
             StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
-                    parameters("time", 1262304000, "interval", 2592000, "end", 1267488000));
+                    parameters("time", 1262304000, "interval", 518400, "end", 1267488000));
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asString().contains("Until period 1267488000 Num infected 13"));
