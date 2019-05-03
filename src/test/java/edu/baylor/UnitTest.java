@@ -71,8 +71,9 @@ public class UnitTest {
 
                     "CREATE (e11:INFECTION { infectionID:'event 11' })" +
                     "CREATE (e12:INFECTION { infectionID:'event 12' })" +
-                    "CREATE (e11:INFECTION { infectionID:'event 13' })" +
-                    "CREATE (e12:INFECTION { infectionID:'event 14' })" +
+                    "CREATE (e13:INFECTION { infectionID:'event 13' })" +
+                    "CREATE (e14:INFECTION { infectionID:'event 14' })" +
+                    "CREATE (e15:INFECTION { infectionID:'event 15' })" +
 
                     "CREATE (b1)-[:OUTPUT {time:1262304000}]->(i1)" +
                     "CREATE (b2)-[:OUTPUT {time:1262304000}]->(i2)" +
@@ -132,16 +133,16 @@ public class UnitTest {
                     "CREATE (e12)-[:OUTPUT {time:1267487000}]->(p21)" +
 
                     //p23 is infected in late T1-> p23 infected in T1
-                    "CREATE (i1)-[:INPUT {time:1262304001}]->(e12)" +
-                    "CREATE (e12)-[:OUTPUT {time:1262304001}]->(p23)" +
+                    "CREATE (i1)-[:INPUT {time:1262304001}]->(e13)" +
+                    "CREATE (e13)-[:OUTPUT {time:1262304001}]->(p23)" +
 
                     //p23 interacts with p24 in early T1-> should not contaminate p24 in T1
-                    "CREATE (p23)-[:INPUT {time:1262303999}]->(e13)" +
-                    "CREATE (e13)-[:OUTPUT {time:1262303999}]->(p24)" +
+                    "CREATE (p23)-[:INPUT {time:1262303999}]->(e14)" +
+                    "CREATE (e14)-[:OUTPUT {time:1262303999}]->(p24)" +
 
                     //p23 interacts with p24 again in T2-> now p24 is infected in T2
-                    "CREATE (p23)-[:INPUT {time:1262303999}]->(e14)" +
-                    "CREATE (e14)-[:OUTPUT {time:1262303999}]->(p24)";
+                    "CREATE (p23)-[:INPUT {time:1262303999}]->(e15)" +
+                    "CREATE (e15)-[:OUTPUT {time:1262303999}]->(p24)";
 
 
     @Test
