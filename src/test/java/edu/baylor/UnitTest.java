@@ -141,8 +141,8 @@ public class UnitTest {
                     "CREATE (e14)-[:OUTPUT {time:1262303999}]->(p24)" +
 
                     //p23 interacts with p24 again in T2-> now p24 is infected in T2
-                    "CREATE (p23)-[:INPUT {time:1262303999}]->(e15)" +
-                    "CREATE (e15)-[:OUTPUT {time:1262303999}]->(p24)";
+                    "CREATE (p23)-[:INPUT {time:1267487000}]->(e15)" +
+                    "CREATE (e15)-[:OUTPUT {time:1267487000}]->(p24)";
 
 
     @Test
@@ -175,7 +175,7 @@ public class UnitTest {
 
             // When I use the procedure with January 1st 2010 for time, and a monthly interval with the end time 2 months later
             StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
-                    parameters("time", 1262304000, "interval", 518400, "end", 1267488000));
+                    parameters("time", 1262304000, "interval", 2592000, "end", 1267488000));
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asString().contains("Until period 1267488000 Num infected 16"));

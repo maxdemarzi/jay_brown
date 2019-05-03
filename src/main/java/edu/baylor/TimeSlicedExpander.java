@@ -24,6 +24,7 @@ public class TimeSlicedExpander implements PathExpander {
         if (path.length() > 0) {
             infectedTime = Procedures.times.get(path.lastRelationship().getId());
         }
+
         // Traverse any relationships AFTER I got infected and before the end of the time interval
         List<Relationship> rels = new ArrayList<>();
         for (Relationship r : path.endNode().getRelationships(Direction.OUTGOING, RelationshipTypes.INPUT, RelationshipTypes.OUTPUT)) {
