@@ -58,6 +58,10 @@ public class UnitTest {
                     "CREATE (p23:PATIENT { patientId:'patient 23' })" +
                     "CREATE (p24:PATIENT { patientId:'patient 24' })" +
 
+                    "CREATE (p25:PATIENT { patientId:'patient 25' })" +
+                    "CREATE (p26:PATIENT { patientId:'patient 26' })" +
+                    "CREATE (p27:PATIENT { patientId:'patient 27' })" +
+
                     "CREATE (e1:INFECTION { infectionID:'event 1' })" +
                     "CREATE (e2:INFECTION { infectionID:'event 2' })" +
                     "CREATE (e3:INFECTION { infectionID:'event 3' })" +
@@ -74,6 +78,10 @@ public class UnitTest {
                     "CREATE (e13:INFECTION { infectionID:'event 13' })" +
                     "CREATE (e14:INFECTION { infectionID:'event 14' })" +
                     "CREATE (e15:INFECTION { infectionID:'event 15' })" +
+
+                    "CREATE (e16:INFECTION { infectionId:'event 16' })" +
+                    "CREATE (e17:INFECTION { infectionId:'event 17' })" +
+                    "CREATE (e18:INFECTION { infectionId:'event 18' })" +
 
                     "CREATE (b1)-[:OUTPUT {time:1262304000}]->(i1)" +
                     "CREATE (b2)-[:OUTPUT {time:1262304000}]->(i2)" +
@@ -124,6 +132,7 @@ public class UnitTest {
                     "CREATE (e10)-[:OUTPUT {time:1267487000}]->(p19)" +
                     "CREATE (e10)-[:OUTPUT {time:1267487000}]->(p20)"+
 
+                    
                     //p21 interacts with p22 in T1-> p22 is not infected at all
                     "CREATE (p21)-[:INPUT {time:1262304000}]->(e11)" +
                     "CREATE (e11)-[:OUTPUT {time:1262304000}]->(p22)" +
@@ -137,12 +146,23 @@ public class UnitTest {
                     "CREATE (e13)-[:OUTPUT {time:1262304001}]->(p23)" +
 
                     //p23 interacts with p24 in early T1-> should not contaminate p24 in T1
-                    "CREATE (p23)-[:INPUT {time:1262303999}]->(e14)" +
-                    "CREATE (e14)-[:OUTPUT {time:1262303999}]->(p24)" +
+                    "CREATE (p23)-[:INPUT {time:1262304000}]->(e14)" +
+                    "CREATE (e14)-[:OUTPUT {time:1262304000}]->(p24)" +
 
                     //p23 interacts with p24 again in T2-> now p24 is infected in T2
                     "CREATE (p23)-[:INPUT {time:1267487000}]->(e15)" +
-                    "CREATE (e15)-[:OUTPUT {time:1267487000}]->(p24)";
+                    "CREATE (e15)-[:OUTPUT {time:1267487000}]->(p24)"+
+
+
+                    //Time simultaneous infection of p25, p26, p27 in T1
+                    "CREATE (i2)-[:INPUT {time:1262304000}]->(e16)" +
+                    "CREATE (e16)-[:OUTPUT {time:1262304000}]->(p25)"+
+
+                    "CREATE (p25)-[:INPUT {time:1262304000}]->(e17)" +
+                    "CREATE (e17)-[:OUTPUT {time:1262304000}]->(p26)"+
+
+                    "CREATE (p26)-[:INPUT {time:1262304000}]->(e18)" +
+                    "CREATE (e18)-[:OUTPUT {time:1262304000}]->(p27)";
 
 
     @Test
@@ -174,11 +194,15 @@ public class UnitTest {
             Session session = driver.session();
 
             // When I use the procedure with January 1st 2010 for time, and a monthly interval with the end time 2 months later
+            //StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
+            //       parameters("time", 1262304000, "interval", 2592000, "end", 1267488000));
             StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
-                    parameters("time", 1262304000, "interval", 2592000, "end", 1267488000));
+                    parameters("time", 1262304000, "interval", 604800, "end", 1293840000));
 
             // Then I should get what I expect
-            assertThat(result.single().get("value").asString().contains("Until period 1267488000 Num infected 16"));
+            System.out.println("Result "+result.single().get("value").asString());
+            System.out.flush();
+            assertThat(result.single().get("value").asString().contains("Until period 1267488000 Num infected 0"));
         }
     }
 
