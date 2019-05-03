@@ -80,7 +80,6 @@ public class CCRunnable implements Runnable {
                 // Add already infected patients to seen
                 infected.or(infectedPatients[counter]);
 
-
                 iterator = infectedPatients[counter].iterator();
                 while (iterator.hasNext()) {
                     nodeId = iterator.next();

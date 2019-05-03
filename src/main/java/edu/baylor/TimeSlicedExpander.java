@@ -19,11 +19,17 @@ public class TimeSlicedExpander implements PathExpander {
 
     @Override
     public Iterable<Relationship> expand(Path path, BranchState branchState) {
+        //When did I get infected
+        long infectedTime = start;
+        if (path.length() > 0) {
+            infectedTime = Procedures.times.get(path.lastRelationship().getId());
+        }
+        // Traverse any relationships AFTER I got infected and before the end of the time interval
         List<Relationship> rels = new ArrayList<>();
         for (Relationship r : path.endNode().getRelationships(Direction.OUTGOING, RelationshipTypes.INPUT, RelationshipTypes.OUTPUT)) {
             if(Procedures.seenRels.contains(r.getId())) { continue; }
             long time = Procedures.times.get(r.getId());
-            if (time >= start && time < end) {
+            if (time >= infectedTime && time < end) {
                 rels.add(r);
                 Procedures.seenRels.add(r.getId());
             }
