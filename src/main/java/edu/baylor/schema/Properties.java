@@ -6,6 +6,7 @@ public final class Properties {
         throw new IllegalAccessError("Utility class");
     }
 
-    public static final String NAME = "name";
-    public static final String TIME = "time";
+    public static final String NAME = "patientId";
+    public static final String TIME = "num";
+    public static final String RECORD_NUM = "record_num";
 }
