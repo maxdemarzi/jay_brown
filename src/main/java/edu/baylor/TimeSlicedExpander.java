@@ -30,7 +30,7 @@ public class TimeSlicedExpander implements PathExpander {
         for (Relationship r : path.endNode().getRelationships(Direction.OUTGOING, RelationshipTypes.INPUT, RelationshipTypes.OUTPUT)) {
             if(Procedures.seenRels.contains(r.getId())) { continue; }
             long time = Procedures.times.get(r.getId());
-            if (time >= infectedTime && time < end) {
+            if (time >= infectedTime && time <= end) {
                 rels.add(r);
                 Procedures.seenRels.add(r.getId());
             }

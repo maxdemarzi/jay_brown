@@ -66,11 +66,12 @@ public class CCRunnable implements Runnable {
         Transaction tx = db.beginTx();
         try {
             long endTime = time;
-            time = time - interval;
+            //time = time - interval;
             // Start - interval and add the interval every time in the loop.
             for (int counter = 0; counter < intervals; counter++ ) {
-                time = time + interval;
-                endTime = endTime + interval;
+                //time = time + interval;
+                //endTime = endTime + interval;
+                endTime = finalEndTime;
                 TimeSlicedExpander expander = new TimeSlicedExpander(time, endTime);
 
                 TraversalDescription td = db.traversalDescription()
@@ -89,9 +90,11 @@ public class CCRunnable implements Runnable {
                     Node patient = db.getNodeById(nodeId);
 
                     for (Path p : td.traverse(patient)) {
+
                         if (p.endNode().hasLabel(Labels.PATIENT)) {
                             nextPatients.add(p.endNode().getId());
                         }
+
                     }
                 }
 
