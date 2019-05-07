@@ -36,8 +36,8 @@ public class CCRunnable implements Runnable {
     @Override
     public void run() {
         // Integer division
-        int intervals = (int)(Math.ceil((finalEndTime+1  - time) / interval));
-
+        //int intervals = (int)(Math.ceil((finalEndTime+1  - time) / interval));
+        int intervals = 1;
         Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
         Roaring64NavigableMap[] infectedPatients = new Roaring64NavigableMap[intervals];

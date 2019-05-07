@@ -181,7 +181,6 @@ public class UnitTest {
                     parameters("time", 0, "interval", 6, "end", 6));
 
             // Then I should get what I expect
-            //assertThat(result.single().get("value").asString().contains("Until period 1264896000 Num infected 9"));
             assertThat(result.single().get("value").asString().contains("Until period 6 Num infected 12"));
         }
 
@@ -203,8 +202,6 @@ public class UnitTest {
                     parameters("time", 0, "interval", 2, "end", 12));
 
             // Then I should get what I expect
-            //System.out.println("Result "+result.single().get("value").asString());
-            //System.out.flush();
             assertThat(result.single().get("value").asString().contains("Until period 12 Num infected 19"));
         }
     }
