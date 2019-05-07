@@ -12,6 +12,7 @@ import java.util.*;
 
 import static edu.baylor.schema.Properties.NAME;
 import static edu.baylor.schema.Properties.TIME;
+import static edu.baylor.schema.Properties.RECORD_NUM;
 
 public class CCRunnable implements Runnable {
 
@@ -26,7 +27,8 @@ public class CCRunnable implements Runnable {
         this.db = db;
         this.log = log;
         this.time = time;
-        this.interval = interval;
+        //this.interval = interval;
+        this.interval = finalEndTime+1 - time;
         this.finalEndTime = finalEndTime;
         this.stringsToPrint = stringsToPrint;
     }
@@ -34,7 +36,7 @@ public class CCRunnable implements Runnable {
     @Override
     public void run() {
         // Integer division
-        int intervals = (int)(Math.ceil((finalEndTime - time) / interval));
+        int intervals = (int)(Math.ceil((finalEndTime+1  - time) / interval));
 
         Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
@@ -51,7 +53,8 @@ public class CCRunnable implements Runnable {
                 long infectedTime = getTimeOfCreation(patient);
                 // Skip any infected nodes beyond our finalendtime
                 if (infectedTime > finalEndTime) { continue; };
-                int slot = (int)(Math.ceil((infectedTime - time) / interval));
+                //int slot = (int)(Math.floor((infectedTime - time) / interval));
+                int slot = 0;
                 infectedPatients[slot].add(patient.getId());
             }
             tx.success();
@@ -116,9 +119,16 @@ public class CCRunnable implements Runnable {
 
     private long getTimeOfCreation(Node patient) {
         long currCreationTime = Long.MAX_VALUE;
-        for (Relationship r : patient.getRelationships(RelationshipTypes.OUTPUT, RelationshipTypes.CARRIER)) {
+        for (Relationship r : patient.getRelationships(RelationshipTypes.OUTPUT)) {
             long retrievedTime = ((Number) r.getProperty(TIME)).longValue();
             currCreationTime = Math.min(retrievedTime, currCreationTime);
+        }
+
+        for (Relationship r : patient.getRelationships(RelationshipTypes.CARRIER)) {
+            long parent_time = ((Number) r.getStartNode().getProperty(RECORD_NUM)).longValue();
+            if (parent_time < currCreationTime) {
+                currCreationTime = parent_time;
+            }
         }
         return currCreationTime;
     }
