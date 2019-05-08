@@ -175,8 +175,6 @@ public class UnitTest {
             Session session = driver.session();
 
             // When I use the procedure with January 1st 2010 for num, and a monthly interval with the end num 2 months later
-            //StatementResult result = session.run("CALL " + Procedures.runname + "($num, $interval, $end)",
-              //      parameters("num", 5, "interval", 2592000, "end", 1264896000));
             StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
                     parameters("time", 0, "interval", 6, "end", 6));
 
@@ -196,8 +194,6 @@ public class UnitTest {
             Session session = driver.session();
 
             // When I use the procedure with January 1st 2010 for num, and a monthly interval with the end num 2 months later
-            //StatementResult result = session.run("CALL " + Procedures.runname + "($num, $interval, $end)",
-            //       parameters("num", 5, "interval", 2592000, "end", 1267488000));
             StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
                     parameters("time", 0, "interval", 2, "end", 12));
 

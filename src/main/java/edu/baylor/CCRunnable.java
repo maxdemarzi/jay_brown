@@ -72,13 +72,14 @@ public class CCRunnable implements Runnable {
                 //time = time + interval;
                 //endTime = endTime + interval;
                 endTime = finalEndTime;
-                TimeSlicedExpander expander = new TimeSlicedExpander(time, endTime);
+                TimeSlicedExpander expander = new TimeSlicedExpander(time, endTime, log);
 
                 TraversalDescription td = db.traversalDescription()
                         .breadthFirst()
                         .expand(expander)
                         .evaluator(Evaluators.excludeStartPosition())
-                        .uniqueness(Uniqueness.NODE_GLOBAL);
+                        //.uniqueness(Uniqueness.NODE_GLOBAL);
+                        .uniqueness(Uniqueness.RELATIONSHIP_GLOBAL);
 
 
                 // Add already infected patients to seen
@@ -93,6 +94,7 @@ public class CCRunnable implements Runnable {
 
                         if (p.endNode().hasLabel(Labels.PATIENT)) {
                             nextPatients.add(p.endNode().getId());
+
                         }
 
                     }
@@ -102,7 +104,9 @@ public class CCRunnable implements Runnable {
                 nextPatients.andNot(infectedPatients[counter]);
 
                 stringsToPrint.add("/" + " : " + "From: " + time + " Until: " + endTime
-                        + " Infected:  at start " + infectedPatients[counter].getLongCardinality() + " newly infected " + nextPatients.getLongCardinality() + " All Infected: " + infected.getLongCardinality() +  ";\n");
+                        + " Infected:  at start " + infectedPatients[counter].getLongCardinality()
+                        + " newly infected " + nextPatients.getLongCardinality() + " All Infected: "
+                        + infected.getLongCardinality() + ";\n");
 
                 // Add known infected plus newly infected patients to known infected patients at next time interval
                 if (counter + 1 < intervals) {
