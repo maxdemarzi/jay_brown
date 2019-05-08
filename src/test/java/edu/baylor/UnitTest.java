@@ -175,8 +175,8 @@ public class UnitTest {
             Session session = driver.session();
 
             // When I use the procedure with January 1st 2010 for num, and a monthly interval with the end num 2 months later
-            StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
-                    parameters("time", 0, "interval", 6, "end", 6));
+            StatementResult result = session.run("CALL " + Procedures.runname + "($time, $end)",
+                    parameters("time", 0, "end", 6));
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asString().contains("Until period 6 Num infected 12"));
@@ -194,8 +194,8 @@ public class UnitTest {
             Session session = driver.session();
 
             // When I use the procedure with January 1st 2010 for num, and a monthly interval with the end num 2 months later
-            StatementResult result = session.run("CALL " + Procedures.runname + "($time, $interval, $end)",
-                    parameters("time", 0, "interval", 2, "end", 12));
+            StatementResult result = session.run("CALL " + Procedures.runname + "($time, $end)",
+                    parameters("time", 0, "end", 12));
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asString().contains("Until period 12 Num infected 19"));

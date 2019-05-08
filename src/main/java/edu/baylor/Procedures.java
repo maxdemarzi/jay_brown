@@ -41,8 +41,8 @@ public class Procedures {
     private static GraphDatabaseService dbapi;
 
     @Procedure(name = "edu.baylor.cc", mode = Mode.WRITE)
-    @Description("CALL edu.baylor.cc(from, to, end) - find connected components between timestamps")
-    public Stream<StringResult> cc(@Name("time") Number time, @Name("interval") Number interval, @Name("endtime") Number endtime) throws InterruptedException {
+    @Description("CALL edu.baylor.cc(time, endtime) - find connected components between timestamps")
+    public Stream<StringResult> cc(@Name("time") Number time, @Name("endtime") Number endtime) throws InterruptedException {
         if (dbapi == null) {
             dbapi = db;
         }
@@ -53,7 +53,7 @@ public class Procedures {
         long start = System.nanoTime();
         ArrayList<String> stringsToPrint = new ArrayList<>();
 
-        Thread t1 = new Thread(new CCRunnable(db, log, time.longValue(), interval.longValue(), endtime.longValue(), stringsToPrint));
+        Thread t1 = new Thread(new CCRunnable(db, log, time.longValue(), endtime.longValue(), stringsToPrint));
         t1.start();
         t1.join();
 
