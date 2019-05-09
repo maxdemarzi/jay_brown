@@ -10,6 +10,7 @@ import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
 import java.util.*;
 
+import static edu.baylor.Procedures.infected;
 import static edu.baylor.schema.Properties.NAME;
 import static edu.baylor.schema.Properties.TIME;
 import static edu.baylor.schema.Properties.RECORD_NUM;
@@ -32,7 +33,6 @@ public class CCRunnable implements Runnable {
 
     @Override
     public void run() {
-        Roaring64NavigableMap infected = new Roaring64NavigableMap();
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
         Roaring64NavigableMap infectedPatients = new Roaring64NavigableMap();
 

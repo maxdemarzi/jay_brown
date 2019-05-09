@@ -37,7 +37,12 @@ public class TimeSlicedExpander implements PathExpander {
 
         for (Relationship r : path.endNode().getRelationships(Direction.OUTGOING, RelationshipTypes.INPUT, RelationshipTypes.OUTPUT)) {
 
+            // We looked at this relationship already
             if(Procedures.seenRels.contains(r.getId())) { continue; }
+
+            // We already infected this person
+            if (Procedures.infected.contains(r.getEndNodeId())) { continue; }
+
             long time = Procedures.times.get(r.getId());
             if (time >= infectedTime && time <= end) {
                 rels.add(r);

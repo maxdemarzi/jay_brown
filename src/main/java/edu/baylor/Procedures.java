@@ -37,6 +37,7 @@ public class Procedures {
     }
 
     static Roaring64NavigableMap seenRels = new Roaring64NavigableMap();
+    static Roaring64NavigableMap infected = new Roaring64NavigableMap();
 
     private static GraphDatabaseService dbapi;
 
@@ -50,7 +51,9 @@ public class Procedures {
         Procedures.seenRels.clear();
         Procedures.seenRels.runOptimize();
 
-        long start = System.nanoTime();
+        Procedures.infected.clear();
+        Procedures.infected.runOptimize();
+
         ArrayList<String> stringsToPrint = new ArrayList<>();
 
         Thread t1 = new Thread(new CCRunnable(db, log, time.longValue(), endtime.longValue(), stringsToPrint));
