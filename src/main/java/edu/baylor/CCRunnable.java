@@ -33,8 +33,10 @@ public class CCRunnable implements Runnable {
 
     @Override
     public void run() {
+        Long initial = 0L;
+        Long end = 0L;
         Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
-        Roaring64NavigableMap infectedPatients = new Roaring64NavigableMap();
+        Roaring64NavigableMap AgainNextPatients = new Roaring64NavigableMap();
 
         // Step 1: Get the initial set of infected patients
         try(Transaction tx = db.beginTx()) {
@@ -44,7 +46,7 @@ public class CCRunnable implements Runnable {
                 long infectedTime = getTimeOfCreation(patient);
                 // Skip any infected nodes beyond our final end time
                 if (infectedTime > finalEndTime) { continue; };
-                infectedPatients.add(patient.getId());
+                nextPatients.add(patient.getId());
             }
             tx.success();
         }
@@ -63,9 +65,11 @@ public class CCRunnable implements Runnable {
                         .uniqueness(Uniqueness.RELATIONSHIP_GLOBAL);
 
                 // Add already infected patients to seen
-                infected.or(infectedPatients);
+                infected.or(nextPatients);
+                initial = infected.getLongCardinality();
 
-                iterator = infectedPatients.iterator();
+            while (nextPatients.getLongCardinality() > 0) {
+                iterator = nextPatients.iterator();
                 while (iterator.hasNext()) {
                     nodeId = iterator.next();
                     Node patient = db.getNodeById(nodeId);
@@ -73,17 +77,24 @@ public class CCRunnable implements Runnable {
                     for (Path p : td.traverse(patient)) {
                         if (p.endNode().hasLabel(Labels.PATIENT)) {
                             infected.add(p.endNode().getId());
-                            nextPatients.add(p.endNode().getId());
+                            AgainNextPatients.add(p.endNode().getId());
                         }
                     }
                 }
 
-                infected.or(nextPatients);
-                nextPatients.andNot(infectedPatients);
+                // Loop
+                nextPatients.clear();
+                nextPatients.or(AgainNextPatients);
+                AgainNextPatients.clear();
+
+            }
+
+            end = infected.getLongCardinality() - initial;
+            infected.or(nextPatients);
 
                 stringsToPrint.add("/" + " : " + "From: " + time + " Until: " + finalEndTime
-                        + " Infected:  at start " + infectedPatients.getLongCardinality()
-                        + " newly infected " + nextPatients.getLongCardinality() + " All Infected: "
+                        + " Infected:  at start " + initial
+                        + " newly infected " + end + " All Infected: "
                         + infected.getLongCardinality() + ";\n");
 
             tx.success();
