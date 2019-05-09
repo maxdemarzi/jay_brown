@@ -72,9 +72,9 @@ public class CCRunnable implements Runnable {
 
                     for (Path p : td.traverse(patient)) {
                         if (p.endNode().hasLabel(Labels.PATIENT)) {
+                            infected.add(p.endNode().getId());
                             nextPatients.add(p.endNode().getId());
                         }
-
                     }
                 }
 
