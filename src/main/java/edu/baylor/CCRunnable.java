@@ -33,10 +33,8 @@ public class CCRunnable implements Runnable {
 
     @Override
     public void run() {
-        Long initial = 0L;
-        Long end = 0L;
-        Roaring64NavigableMap nextPatients = new Roaring64NavigableMap();
-        Roaring64NavigableMap AgainNextPatients = new Roaring64NavigableMap();
+        Roaring64NavigableMap infected = new Roaring64NavigableMap();
+        Roaring64NavigableMap initialPatients = new Roaring64NavigableMap();
 
         // Step 1: Get the initial set of infected patients
         try(Transaction tx = db.beginTx()) {
@@ -46,56 +44,44 @@ public class CCRunnable implements Runnable {
                 long infectedTime = getTimeOfCreation(patient);
                 // Skip any infected nodes beyond our final end time
                 if (infectedTime > finalEndTime) { continue; };
-                nextPatients.add(patient.getId());
+                initialPatients.add(patient.getId());
             }
             tx.success();
         }
 
-        Iterator<Long> iterator;
+        // iterator;
         long nodeId;
 
+        //Step 2: traverse our initial set
         Transaction tx = db.beginTx();
         try {
-                TimeSlicedExpander expander = new TimeSlicedExpander(time, finalEndTime, log);
+            TimeSlicedExpander expander = new TimeSlicedExpander(time, finalEndTime, log);
 
-                TraversalDescription td = db.traversalDescription()
-                        .breadthFirst()
-                        .expand(expander)
-                        .evaluator(Evaluators.excludeStartPosition())
-                        .uniqueness(Uniqueness.RELATIONSHIP_GLOBAL);
+            TraversalDescription td = db.traversalDescription()
+                    .breadthFirst()
+                    .expand(expander)
+                    .evaluator(Evaluators.excludeStartPosition())
+                    .uniqueness(Uniqueness.NODE_GLOBAL);
 
-                // Add already infected patients to seen
-                infected.or(nextPatients);
-                initial = infected.getLongCardinality();
+            // Add already initial patients to infected
+            infected.or(initialPatients);
+            Iterator<Long> iterator = initialPatients.iterator();
 
-            while (nextPatients.getLongCardinality() > 0) {
-                iterator = nextPatients.iterator();
-                while (iterator.hasNext()) {
-                    nodeId = iterator.next();
-                    Node patient = db.getNodeById(nodeId);
+            while (iterator.hasNext()) {
+                nodeId = iterator.next();
+                Node patient = db.getNodeById(nodeId);
 
-                    for (Path p : td.traverse(patient)) {
-                        if (p.endNode().hasLabel(Labels.PATIENT)) {
-                            infected.add(p.endNode().getId());
-                            AgainNextPatients.add(p.endNode().getId());
-                        }
+                //Add node if infected
+                for (Path p : td.traverse(patient)) {
+                    if (p.endNode().hasLabel(Labels.PATIENT)) {
+                        infected.add(p.endNode().getId());
                     }
                 }
-
-                // Loop
-                nextPatients.clear();
-                nextPatients.or(AgainNextPatients);
-                AgainNextPatients.clear();
-
             }
 
-            end = infected.getLongCardinality() - initial;
-            infected.or(nextPatients);
-
-                stringsToPrint.add("/" + " : " + "From: " + time + " Until: " + finalEndTime
-                        + " Infected:  at start " + initial
-                        + " newly infected " + end + " All Infected: "
-                        + infected.getLongCardinality() + ";\n");
+            stringsToPrint.add("/" + " : " + "From: " + time + " Until: " + finalEndTime
+                    + " Infected:  at start " + initialPatients.getLongCardinality()
+                    +  " All Infected: " + infected.getLongCardinality() + ";\n");
 
             tx.success();
         } catch ( Exception e ) {
@@ -106,6 +92,7 @@ public class CCRunnable implements Runnable {
         }
     }
 
+    //Get node creation time from incoming edges
     private long getTimeOfCreation(Node patient) {
         long currCreationTime = Long.MAX_VALUE;
         for (Relationship r : patient.getRelationships(RelationshipTypes.OUTPUT)) {
