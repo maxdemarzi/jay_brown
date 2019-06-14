@@ -24,23 +24,29 @@ public class TimeSlicedExpander implements PathExpander {
 
     @Override
     public Iterable<Relationship> expand(Path path, BranchState branchState) {
+        boolean event = false;
+        List<Relationship> rels = new ArrayList<>();
+
         if(Procedures.seenNodes.contains(path.endNode().getId())) {
-            return Collections.EMPTY_LIST;
+            return rels;
         } else {
             // Never revisit an Event node.
-            if(path.endNode().hasLabel(Labels.TYPE_2)) {
+            event = path.endNode().hasLabel(Labels.TYPE_2);
+            if(event) {
                 Procedures.seenNodes.add(path.endNode().getId());
             }
         }
-
-        List<Relationship> rels = new ArrayList<>();
 
         for (Relationship r : path.endNode().getRelationships()) {
             // We looked at this relationship already
             if(Procedures.seenRels.contains(r.getId())) { continue; }
 
-            // We already infected this person
-            if (Procedures.infected.contains(r.getEndNodeId())) { continue; }
+            // Check if we already infected this person if we are at an Event
+            if (event) {
+                if (Procedures.infected.contains(r.getEndNodeId())) {
+                    continue;
+                }
+            }
 
             long time = Procedures.times.get(r.getId());
             if (time <= end) {
