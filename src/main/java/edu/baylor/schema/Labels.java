@@ -4,5 +4,6 @@ import org.neo4j.graphdb.Label;
 
 public enum Labels implements Label {
     Infected,
-    PATIENT
+    TYPE_1, // Patient
+    TYPE_2 // Event
 }
