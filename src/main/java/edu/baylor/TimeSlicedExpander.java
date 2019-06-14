@@ -24,6 +24,14 @@ public class TimeSlicedExpander implements PathExpander {
 
     @Override
     public Iterable<Relationship> expand(Path path, BranchState branchState) {
+        if(Procedures.seenNodes.contains(path.endNode().getId())) {
+            return Collections.EMPTY_LIST;
+        } else {
+            // Never revisit an Event node.
+            if(path.endNode().hasLabel(Labels.TYPE_2)) {
+                Procedures.seenNodes.add(path.endNode().getId());
+            }
+        }
 
         List<Relationship> rels = new ArrayList<>();
 

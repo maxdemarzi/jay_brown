@@ -37,6 +37,7 @@ public class Procedures {
     }
 
     static Roaring64NavigableMap seenRels = new Roaring64NavigableMap();
+    static Roaring64NavigableMap seenNodes = new Roaring64NavigableMap();
     static Roaring64NavigableMap infected = new Roaring64NavigableMap();
 
     private static GraphDatabaseService dbapi;
@@ -50,6 +51,9 @@ public class Procedures {
         // Clean up seen Rels Cache per query
         Procedures.seenRels.clear();
         Procedures.seenRels.runOptimize();
+
+        Procedures.seenNodes.clear();
+        Procedures.seenNodes.runOptimize();
 
         Procedures.infected.clear();
         Procedures.infected.runOptimize();
