@@ -54,13 +54,17 @@ public class CCRunnable implements Runnable {
 
         //Step 2: traverse our initial set
         Transaction tx = db.beginTx();
+        //long counterNodes = 0;
+        
         try {
             TimeSlicedExpander expander = new TimeSlicedExpander(time, finalEndTime, log);
 
             TraversalDescription td = db.traversalDescription()
                     .breadthFirst()
+                    //.depthFirst()
                     .expand(expander)
                     .evaluator(Evaluators.excludeStartPosition())
+                    //.evaluator(Evaluators.toDepth(6))
                     .uniqueness(Uniqueness.NODE_GLOBAL);
 
             // Add already initial patients to infected
