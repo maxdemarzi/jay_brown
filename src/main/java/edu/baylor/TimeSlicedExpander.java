@@ -8,8 +8,7 @@ import org.neo4j.logging.Log;
 
 import static edu.baylor.schema.Properties.NAME;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class TimeSlicedExpander implements PathExpander {
 
@@ -38,8 +37,10 @@ public class TimeSlicedExpander implements PathExpander {
             long time = Procedures.times.get(r.getId());
             if (time <= end) {
                 rels.add(r);
-                Procedures.seenRels.add(r.getId());
             }
+
+            // Regardless of if the relationship is over or under the time, I should not look at it again.
+            Procedures.seenRels.add(r.getId());
         }
         return rels;
 
