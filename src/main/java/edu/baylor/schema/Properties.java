@@ -9,4 +9,5 @@ public final class Properties {
     public static final String NAME = "patientId";
     public static final String TIME = "num";
     public static final String RECORD_NUM = "record_num";
+    public static final String EVENT_ID = "infectionID";
 }

@@ -15,46 +15,27 @@ public class TimeSlicedExpander implements PathExpander {
     private Long start;
     private Long end;
     private Log log;
+    private Long depth;
+    private String depth_property;
 
-    public TimeSlicedExpander(Long start, Long end, Log log) {
+    public TimeSlicedExpander(Long start, Long end, Log log, String depth_property) {
         this.start = start;
         this.end = end;
         this.log = log;
+        this.depth_property = depth_property;
     }
 
     @Override
     public Iterable<Relationship> expand(Path path, BranchState branchState) {
-        boolean event = false;
+
         List<Relationship> rels = new ArrayList<>();
-
-        if(Procedures.seenNodes.contains(path.endNode().getId())) {
-            return rels;
-        } else {
-            // Never revisit an Event node.
-            event = path.endNode().hasLabel(Labels.TYPE_2);
-            if(event) {
-                Procedures.seenNodes.add(path.endNode().getId());
-            }
-        }
-
         for (Relationship r : path.endNode().getRelationships()) {
-            // We looked at this relationship already
-            if(Procedures.seenRels.contains(r.getId())) { continue; }
-
-            // Check if we already infected this person if we are at an Event
-            if (event) {
-                if (Procedures.infected.contains(r.getEndNodeId())) {
-                    continue;
-                }
-            }
 
             long time = Procedures.times.get(r.getId());
             if (time <= end) {
+                if (r.hasProperty(depth_property)) {continue;}
                 rels.add(r);
             }
-
-            // Regardless of if the relationship is over or under the time, I should not look at it again.
-            Procedures.seenRels.add(r.getId());
         }
         return rels;
 

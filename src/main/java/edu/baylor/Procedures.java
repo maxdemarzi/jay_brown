@@ -43,8 +43,10 @@ public class Procedures {
     private static GraphDatabaseService dbapi;
 
     @Procedure(name = "edu.baylor.cc", mode = Mode.WRITE)
-    @Description("CALL edu.baylor.cc(time, endtime) - find connected components between timestamps")
-    public Stream<StringResult> cc(@Name("time") Number time, @Name("endtime") Number endtime) throws InterruptedException {
+    @Description("CALL edu.baylor.cc(time, endtime, depth) - find connected components between timestamps")
+    public Stream<StringResult> cc(@Name("time") Number time, @Name("endtime") Number endtime,
+                                   @Name("maxDepth") Number maxDepth, @Name("depth_property") String depth_property)
+            throws InterruptedException {
         if (dbapi == null) {
             dbapi = db;
         }
@@ -60,7 +62,8 @@ public class Procedures {
 
         ArrayList<String> stringsToPrint = new ArrayList<>();
 
-        Thread t1 = new Thread(new CCRunnable(db, log, time.longValue(), endtime.longValue(), stringsToPrint));
+        Thread t1 = new Thread(new CCRunnable(db, log, time.longValue(), endtime.longValue(), stringsToPrint,
+                maxDepth.longValue(), depth_property));
         t1.start();
         t1.join();
 
